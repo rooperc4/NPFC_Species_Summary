@@ -27,6 +27,14 @@ source("C:/Users/rooperc/Documents/Chris Work Stuff/R Software Help and Function
 
 ```
 
+Download the data from https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx
+
+```{r download data}
+
+
+```
+
+
 ```{r catchgraph}
 catch<-read.csv("BF Catch.csv",header=TRUE)
 catch$Japan<-catch[,3]+catch[,4]
