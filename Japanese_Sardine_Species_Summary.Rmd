@@ -1,0 +1,163 @@
+---
+title: "Japanese Sardine Species Summary"
+author: "NPFC Japanese Sardine Small Working Group"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+
+# library(raster)
+# library(BottomFishingFootprint)
+# library(rgdal)
+# library(maptools)
+# library(gstat)
+# library(rgeos)
+# library(proj4)
+# library(sp)
+# library(maps)
+# library(RODBC)
+# library(viridis)
+# library(plyr)
+# library(ggmap)
+# library(ggplot2)
+# library(gridExtra)
+# library(tidyr)
+# source("C:/Users/rooperc/Documents/Chris Work Stuff/R Software Help and Functions/Miscellaneous Functions/MappingExtras.R")
+library(rfisheries)
+library(tidyverse)
+
+```
+# Japanese sardine (*Sardinops melanostictus*)
+
+**Common names:** (Chinese); (English); (Japanese); (Korean); (Russian)
+
+## Biological Information
+
+[Insert text here]
+
+```{r picture, fig.cap="Figure 1. Placeholder picture of Pacific Sardine.", echo=FALSE, fig.pos="h"}
+
+knitr::include_graphics(here::here("Figures/pacific_sardine.jpg"))
+
+```
+
+
+
+```{r MapTheDistribution,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
+#IMPORT A BASEMAP AND TRANSFORM TO A NICER PROJECTION FOR THE NORTH ATLANTIC
+bg = ne_countries(scale = "medium",  returnclass = "sf")
+p<-ggplot()+
+  #basemap
+  geom_sf(data = bg)+
+  coord_sf(xlim = range(Antipatharia$Longitude, na.rm = TRUE), 
+           ylim = range(Antipatharia$Latitude, na.rm = TRUE), 
+           expand = TRUE)+
+  
+  # add points
+  geom_point(data = Antipatharia[order(Antipatharia$Presence),], 
+             aes(x=Longitude,y=Latitude,group=as.factor(Presence),color=as.factor(Presence)),
+             alpha = 0.7, shape=20, size = 2)+
+    
+  
+  # formatting
+  scale_fill_viridis_d(option = "plasma")+
+  scale_color_viridis_d(option = "plasma")+
+  labs(x=NULL, y=NULL, 
+       fill = 'Presence', 
+       color = 'Presence')+
+  theme_dark()+
+  theme(panel.grid = element_blank())
+png("Figures/Figure1.png",height=6,width=6,unit="in",res=300)
+print(p)
+dev.off()
+
+
+
+
+
+```{r getFAOcatchdata}
+
+#species = rfisheries::of_species_codes()
+species %>% 
+  filter(str_detect(scientific_name %>% tolower(), pattern = "sardinops"))
+
+species.code<-c("JAP")
+
+FAO_catch<-NULL
+for(i in 1:length(species.code)){
+temp1<-rfisheries::of_landings(species = species.code[i])
+FAO_catch<-rbind(FAO_catch,temp1)}
+
+
+ ggplot() +
+  geom_line(data = FAO_catch, 
+            aes(x = year, y = catch/1000,group=species))+
+  labs(x = "", y = "Catches (T)")+
+  # theme(panel.grid.minor = element_blank(), legend.key = element_blank())+
+  # scale_y_continuous(limits = c(0,100), breaks = seq(10,100,20))+
+  scale_x_continuous(breaks = seq(1955,2015,20))
+  # scale_color_discrete(name = "Countries")+
+
+```
+
+
+Download the data from https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx
+
+```{r download data}
+download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx", destfile="JS_catch.xlsx",mode="wb", quiet = FALSE)
+ENSO_ONI<-read.table("ENSO_ONI.txt",skip=0,as.is=TRUE,header=TRUE)
+colnames(ENSO_ONI)<-c("Months","Year","Total","ENSO_ONI")
+ENSO_ONI<-aggregate(ENSO_ONI~Year,data=ENSO_ONI,FUN="mean",na.rm=TRUE)
+plot(ENSO_ONI)
+
+```
+
+
+```{r catchgraph}
+catch<-read.csv("BF Catch.csv",header=TRUE)
+catch$Japan<-catch[,3]+catch[,4]
+catch$Korea<-catch[,5]+catch[,6]
+catch$Russia<-catch[,7]+catch[,8]
+catch<-catch[,-(3:8)]
+catch<-gather(catch,key=Member,value=Catch,Total:Russia)
+catchSA<-subset(catch,catch$Species=="Splendid Alfonsino")
+p1<-ggplot(catchSA)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ggtitle("North Pacific Armorhead")+ylab("Catch (*1,000)")
+p1
+
+catchNPA<-subset(catch,catch$Species!="Splendid Alfonsino")
+p2<-ggplot(catchNPA)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ggtitle("North Pacific Armorhead")+ylab("Catch (*1,000)")
+p2
+
+png("catch.png",width=6, height=6,units="in",res=300)
+p3<-ggplot(catch)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ylab("Catch (*1,000)")+xlab("Year")+scale_x_continuous(breaks=seq(2000,2020,2))#+theme(axis.text.x=element_text(angle=90))
+p3+facet_wrap(~Species,nrow=2,scales="free")
+dev.off()
+
+effort<-read.csv("Effort.csv",header=TRUE)
+effort<-gather(effort,key=Member,value=Days,Japan:Russia)
+head(effort)
+
+catch_and_effort<-merge(catch,effort,by.x=c("Fishery","Member"),by.y=c("Year","Member"),all.x=TRUE)
+head(catch_and_effort)
+catch_and_effort$CPUE<-catch_and_effort$Catch/catch_and_effort$Days
+
+png("catch_and_effort.png",width=6, height=6,units="in",res=300)
+p3<-ggplot(catch)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ylab("Catch (*1,000)")+xlab("Year")+scale_x_continuous(breaks=seq(2000,2020,2))#+theme(axis.text.x=element_text(angle=90))
+p3+facet_wrap(~Species,nrow=2,scales="free")
+dev.off()
+
+```
+```{r cars}
+newproj<-"+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+
+Emperor1<-raster("D:/BC GIS/GEBCO_Bathy/GEBCO_Emperor.tif")
+Emperor<-projectRaster(Emperor1,crs=CRS(newproj),filename="D:/BC GIS/PICESWG32/projected_bathy",progress="text",overwrite=TRUE)
+
+Emperor<-raster("D:/BC GIS/PICESWG32/projected_bathy")
+Fished_seamounts<-read.csv("seamounts.csv",header=TRUE)
+plot(Emperor1)
+points(cbind(Fished_seamounts$Longitude,Fished_seamounts$Latitude))
+
+```
+
