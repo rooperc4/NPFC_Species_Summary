@@ -13,7 +13,7 @@ NPFC Japanese Sardine Small Working Group
 
 <div class="figure">
 
-<img src="C:/Users/rooperc/Desktop/NPFC/NPFC_Species_Summary/Figures/pacific_sardine.jpg" alt="Figure 1. Placeholder picture of Pacific Sardine." width="275" />
+<img src="Figures/pacific_sardine.jpg" alt="Figure 1. Placeholder picture of Pacific Sardine." width="275" />
 
 <p class="caption">
 
