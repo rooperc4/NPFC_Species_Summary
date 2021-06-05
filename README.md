@@ -25,7 +25,7 @@ Figure 1. Placeholder picture of Pacific Sardine.
 
 <div class="figure">
 
-<img src="C:/Users/rooperc/Desktop/NPFC/NPFC_Species_Summary/Figures/Figure2.png" alt="Figure 2. Map of distribution of Sardine species in the North Pacific." width="1800" />
+<img src="Figures/Figure2.png" alt="Figure 2. Map of distribution of Sardine species in the North Pacific." width="1800" />
 
 <p class="caption">
 
@@ -50,7 +50,7 @@ Download the NPFC data from
 
 <div class="figure">
 
-<img src="C:/Users/rooperc/Desktop/NPFC/NPFC_Species_Summary/Figures/Figure3.png" alt="Figure 3. Historical catch of Japanese Sardine." width="1800" />
+<img src="Figures/Figure3.png" alt="Figure 3. Historical catch of Japanese Sardine." width="1800" />
 
 <p class="caption">
 
@@ -66,7 +66,7 @@ Figure 3. Historical catch of Japanese Sardine.
 
 <div class="figure">
 
-<img src="C:/Users/rooperc/Desktop/NPFC/NPFC_Species_Summary/Figures/Figure4.png" alt="Figure 4. Historical fishing effort for Japanese Sardine." width="1800" />
+<img src="Figures/Figure4.png" alt="Figure 4. Historical fishing effort for Japanese Sardine." width="1800" />
 
 <p class="caption">
 

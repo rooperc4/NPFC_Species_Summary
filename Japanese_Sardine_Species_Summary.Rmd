@@ -30,7 +30,7 @@ library(kableExtra)
 
 ```{r picture, fig.cap="Figure 1. Placeholder picture of Pacific Sardine.", echo=FALSE}
 
-knitr::include_graphics(here::here("Figures/pacific_sardine.jpg"))
+knitr::include_graphics("Figures/pacific_sardine.jpg")
 
 ```
 
@@ -79,7 +79,7 @@ dev.off()
 
 ```{r picture4, fig.cap="Figure 2. Map of distribution of Sardine species in the North Pacific.", echo=FALSE}
 
-knitr::include_graphics(here::here("Figures/Figure2.png"))
+knitr::include_graphics("Figures/Figure2.png")
 
 ```
 
@@ -139,7 +139,7 @@ dev.off()
 
 ```{r picture2, fig.cap="Figure 3. Historical catch of Japanese Sardine.", echo=FALSE}
 
-knitr::include_graphics(here::here("Figures/Figure3.png"))
+knitr::include_graphics("Figures/Figure3.png")
 
 ```
 
@@ -175,7 +175,7 @@ dev.off()
 
 ```{r picture1, fig.cap="Figure 4. Historical fishing effort for Japanese Sardine.", echo=FALSE}
 
-knitr::include_graphics(here::here("Figures/Figure4.png"))
+knitr::include_graphics("Figures/Figure4.png")
 
 ```
 
