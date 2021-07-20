@@ -1,14 +1,34 @@
 ---
-title: "Japanese Sardine Species Summary"
-author: "NPFC Japanese Sardine Small Working Group"
-date: "`r Sys.Date()`"
-output: pdf_document
-always_allow_html: true  
+title: |
+  | Species Summary
+  | Japanese Sardine
+author: '*NPFC Japanese Sardine Small Working Group*'
+date: '*`r Sys.Date()`*'
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+  html_document:
+    df_print: paged
+  df_print: default
+  word_document: default
+  pdf_document: default
+always_allow_html: yes
 bibliography: JapaneseSardinebibliography.bib
-
 ---
 
 ```{r setup, include=FALSE}
+out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+knitr::opts_chunk$set(warning = FALSE, mesNPAge = FALSE) 
+options(tinytex.verbose = TRUE)
+
+```
+
+```{r, echo=FALSE}
+out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+```
+
+```{r load package, include=FALSE}
 library(rgdal)
 library(rgeos)
 library(sp)
@@ -19,17 +39,20 @@ library(rnaturalearth)
 library(sf)
 library(readxl)
 library(kableExtra)
-
+library(GLDEX)
+library(RColorBrewer)
 ```
+
+
 # Japanese sardine (*Sardinops melanostictus*)
 
 **Common names:** (Chinese); Japanese Sardine; (Japanese); (Korean); (Russian) - Need names in each language
 
-**Other common names**
+**Other common names:**
 
-```{r picture, fig.cap="Placeholder picture of Pacific Sardine.", echo=FALSE}
+```{r picture, fig.cap="Figure 1. Placeholder picture of Pacific Sardine.", echo=FALSE}
 
-knitr::include_graphics("Figures/pacific_sardine.jpg")
+knitr::include_graphics("Figures/pacific_sardine.png")
 
 ```
 ## Management
@@ -38,43 +61,51 @@ knitr::include_graphics("Figures/pacific_sardine.jpg")
 
 The following NPFC conservation and mangement measure (CMM) pertains to this species: 
 
-CMM 2021-11 For Japanese Sarding, Neon Flying Squid and Japanese Flying Squid
+-   CMM 2021-11 For Japanese Sardine, Neon Flying Squid and Japanese Flying Squid
 
+Available from https://www.npfc.int/active-conservation-and-management-measures
 
 ### Management Summary
 
 The current management measure for Japanese Sardine does not specify catch or effort limits. The CMM states that Members and Cooperating non-Contracting Parties currently harvesting Japanese Sardine should refrain from expansion of the number of fishing vessels authorized to fish Japanese Sardine in the Convention Area. New harvest capacity should also be avoided until as stock assessment has been completed. 
 
-Stock assessments for Japanese Sardine are conducted by Japan for their National Waters and management is based off of these assessments. 
+A stock assessment for Japanese Sardine is conducted by Japan within their EEZ and used for management of the domestic fishery. 
 
 ```{r manaagment table,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
-tabledat<-data.frame("Convention or Management Principle"=c("Biological reference point(s)", "Stock status","Catch limit","Harvest control rule", "Other"), Status=c(1,0,2,1,2),"Comment or Consideration"=c("Not established","Status determination criteria not established","Recommended catch, effort limits","Not established","No expansion of fishing beyond established areas"))
+tabledat<-data.frame("Convention or Management Principle"=c("Biological reference point(s)", "Stock status","Catch limit","Harvest control rule", "Other"), Status=c("Not accomplished","Unknown","Intermediate","Not accomplished","Intermediate"),"Comment or Consideration"=c("Not established","Status determination criteria not established","Recommended catch, effort limits","Not established","No expansion of fishing beyond established areas"))
 
-hcolor<-c("gray","red","yellow","green")
+hcolor<-c("red","gray","orange","red","orange")
 ```
 
 ```{r maketable,echo=FALSE}
-tabledat%>%kbl(col.names=c("Convention or Management Principle","Status","Comment or Consideration"))%>%kable_classic_2(full_width=F)%>%
-    column_spec(2, color = hcolor[tabledat$Status+1],
-              background = hcolor[tabledat$Status+1])%>%
-  footnote("\\\\textcolor{green}{OK}, \\\\textcolor{yellow}{Intermediate}, \\\\textcolor{red}{Not accomplished}, \\\\textcolor{gray}{Unknown}", title_format="bold",escape = F)
+tabledat%>%kbl(col.names=c("Convention or Management Principle","Status","Comment or Consideration"),caption = '<font size= "5">Management Summary</font>')%>%kable_classic_2(full_width=F)%>%
+    column_spec(2, color = "white",background = hcolor) 
+#%>%
+
+  #  footnote("\\\\textcolor{green}{OK}, \\\\textcolor{yellow}{Intermediate}, \\\\textcolor{red}{Not accomplished}, \\\\textcolor{gray}{Unknown}", title_format="bold",escape = F)
     
     
 ```
 
-## Stock Assessment
+## Assessment
 
-No stock assessment has been conducted by NPFC for the convention area.  Japan has conducted a stock assessment in their national waters [@Hiroshi2005StockAA].
+There is currently no stock assessment for Japanese Sardine conducted by NPFC for the convention area. 
+
+Japan conducts an assessment of the Japanese Sardine stock using VPA and a number of data sources described below [@Hiroshi2005StockAA].
 
 ## Data
-### Survey
-Japan conducts three surveys that estimate recruitment for a number of pelagic species, including Japanese Sardine (Table 2). Surveys are conducted in spring (1995-2020), summer (2001-2020) and fall (2005-2020) at 30-80 stations per year. The survey protocol can be found at [website?]. Russia has conducted a summertime acoustic-trawl survey since 2010 that examines mid-water and upper epi-pelagic species including Japanese Sardine. 
+### Surveys
+Japan conducts three surveys that estimate recruitment for a number of pelagic species, including Japanese Sardine (Table 1). The surveys target pre-recruits and juveniles to determine an index of recruitment. Japan also conducts a monthly egg and larval survey that is used to estimate spawning stock biomass. Surveys are conducted in spring (1995-2020), summer (2001-2020) and fall (2005-2020) at 30-80 stations per year. The survey protocol can be found at [website?]. Russia has conducted a summertime acoustic-trawl survey since 2010 that examines mid-water and upper epipelagic species including Japanese Sardine. 
 
 ### Fishery
 
-THe fishery for Japanese Sardine is conducted mainly with purse seines and set nets in Japanese domestic waters. The Russian fishery uses purse seines and pelagic trawls. [insert other relevant characteristics]
+China, Japan and Russia catch Japanese sardine. China does not target the species, but is captured as bycatch in other fisheries (e.g. chub mackerel). Catches are primarily by purse seine, with a smaller component of the catch taken by pelagic trawl. China’s catch of Japanese Sardine is taken exclusively from the Convention Area from April to December. China's existing catch records are from 2016 to 2020 and show increasing catches during that time period as the stock has been increasing. The historical catches (prior to 2016) are unknown, thought to be low and likely need to be confirmed. 
 
-Fishery catch data is available for Members from the NPFC website (https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx) since 2001. Previous fishery catch data was downloaded from FAO data collections at https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx using rfisheries package. 
+Japan's fishery for Japanese Sardine occurs inside their EEZ and is mostly conducted by large purse seine vessels (>90% of the catch). Additional components of the fishery include set nets, dip nets and other gears. The fishery experienced very high catches in the 1980’s and early 1990’s, a decline to very low catches from 1995 to ~2010 and has been recovering since then. The fishery is conducted year round, but mainly during the summer season. 
+
+The Russian fishery occurs inside their EEZ and is prosecuted primarily by pelagic trawling (>90% of the catch), with a smaller component of the catch coming from purse seines. The success of Russian fishery depends on the migration patterns and overall abundance of Japanese Sardine, as the sardine move into Russian waters when their abundance is high. For this reason, there was no catch from 1994-2011 when the stock abundance was low, but in recent years (since 2016) as the stock has recovered and water temperatures have been warm there have been increasing catches in Russia. The Russian fishery occurs primarily from June to November
+
+
 
 ```{r getcatchdata,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
 #FAO Data
@@ -118,13 +149,16 @@ p1
 dev.off()
 ```
 
-```{r picture2, fig.cap="Historical catch of Japanese Sardine.", echo=FALSE}
+```{r picture2, fig.cap="Figure 2. Historical catch of Japanese Sardine.", echo=FALSE}
 
 knitr::include_graphics("Figures/Figure3.png")
 
 ```
 
-[insert text here]
+Vanuatu, Korea and Chinese Taipei do not target Japanese Sardine. Chinese Taipei hsa some historical records of Japanese Sardine bycatch in the Pacific Saury fishery (~100 mt) and Korea has a small amount of historical bycatch data from the bottom trawl fishery. Vanuatu has no record of Japanese Sardine catches.
+
+Fishery catch data is available for Members from the NPFC website (https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx) since 2001. Prior years fishery catch data was downloaded from FAO data collections at https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx using rfisheries package. 
+
 
 ```{r effort data,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
 NPFC_effort<-data.frame(read_xlsx("JS_catch.xlsx",sheet="Effort",skip=19,col_types='numeric'))
@@ -155,11 +189,22 @@ dev.off()
 
 
 
-```{r picture1, fig.cap="Historical fishing effort for Japanese Sardine.", echo=FALSE}
+```{r picture1, fig.cap="Figure 3. Historical fishing effort for Japanese Sardine.", echo=FALSE}
 
 knitr::include_graphics("Figures/Figure4.png")
 
 ```
+
+
+
+### Biological collections
+
+China collected biological data from fishery catches of Japanese Sardine in 2020. These collections included length data as well as maturity and age structures.
+
+Russia collects length and weight data, age structures (scales) and maturity data from both commercial catches and surveys. 
+
+Japan also collects length, weight, maturity and age data from the survey and fishery to support their stock assessment.
+
 
 
 Table 1. Data availability from Members regarding Japanese Sardine
@@ -174,14 +219,12 @@ kable(tabledat)
 ```
 ## Special Comments
 
-[insert text here]
-
-
+None
 
 ## Biological Information
 
 ### Distribution
-Japanese sardine (*Sardinops melanostichtus*; Figure 1) are a pelagic species that occurs in large migratory schools in the coastal waters of  China, Chinese Taipei, Japan, Korea and Russia (Figure 2). They generally migrate from the south to the north during summer, returning to inshore areas in the south to spawn in the winter. Japanese sardine feed mainly on zooplankton and phytoplankton. 
+Japanese sardine (*Sardinops melanostichtus*; Figure 1) are a pelagic species that occurs in large migratory schools in the coastal waters of China, Chinese Taipei, Japan, Korea and Russia (Figure 2). They generally migrate from the south to the north during summer, returning to inshore areas in the south to spawn in the winter. Japanese sardine feed mainly on zooplankton and phytoplankton. 
 
 ### Life history
 Japanese sardine are short-lived and fast growing, maturing early at 2-years old. Their maximum length is ~24 cm and their maximum reported age is 25 years [@Whitehead1985]. Their growth rates and spawning patterns are highly influenced by the environment [@Niino2021]
@@ -203,6 +246,7 @@ bg1<-st_transform(bg,3832)
 data2<-project(cbind(data1$Lon,data1$Lat),"+proj=merc +lon_0=150 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs")
 data1$LonP<-data2[,1]
 data1$LatP<-data2[,2]
+data1<-subset(data1,data1$Lon>0)
 
 #MAKE A SET OF BOUNDARIES TO USE AS THE PLOTTING RANGE (LIMITS ON LONGITUDE AND LATITUDE)
 data3<-data.frame(cbind(c(130,235),c(62,10)))
@@ -230,7 +274,7 @@ print(p)
 dev.off()
 ```
 
-```{r picture4, fig.cap="Map of distribution of Sardine species in the North Pacific.", echo=FALSE}
+```{r picture4, fig.cap="Figure 4. Map of distribution of Sardine species in the North Pacific.", echo=FALSE}
 
 knitr::include_graphics("Figures/Figure2.png")
 
@@ -239,6 +283,5 @@ knitr::include_graphics("Figures/Figure2.png")
 ## Literature cited
 
 Kaschner, K., Kesner-Reyes, K., Garilao, C., Segschneider, J., Rius-Barile, J. Rees, T., & Froese, R. 2019. AquaMaps: Predicted range maps for aquatic species. Data retrieved from https://www.aquamaps.org.
-
 Karthik Ram, Carl Boettiger and Andrew Dyck (2013). rfisheries: R   interface for fisheries data. R package version 0.1.
   http://CRAN.R-project.org/package=rfisheries
