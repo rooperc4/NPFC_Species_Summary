@@ -1,0 +1,200 @@
+---
+title: |
+  | Species Summary
+  | North Pacific armorhead
+author: '*NPFC Bottom Fisheries Small Working Group*'
+date: '*`r Sys.Date()`*'
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
+  word_document: default
+  html_document:
+    df_print: paged
+always_allow_html: yes
+---
+```{r setup, echo=FALSE, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+options(tinytex.verbose = TRUE)
+```
+
+```{r load package, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(rgdal)
+library(rgeos)
+library(sp)
+library(rnaturalearth)
+library(sf)
+library(kableExtra)
+library(GLDEX)
+library(RColorBrewer)
+library(scales)
+```
+
+# North Pacific armorhead (*Pentaceros wheeleri*)
+
+**Common names:** Pelagic armorhead, Slender armorhead (English); 五棘鲷 (Chinese); クサカリツボダイ (Japanese); 북방돗돔 (Korean);  кабан-рыба (Russian)
+
+## Biological Information
+
+North Pacific armorhead has a unique life history consisting of a pelagic larva phase and a demersal adult stage on the seamounts (Kiyota et al. 2016). Distribution of the larva includes Gulf of Alaska to North Pacific Ocean off central California and south of Japan, with center of abundance at the Emperor Seamounts. Following their settlements in the seamounts, adults make morphological changes from the "fat" type to the "lean" type concurrent with their dietary shifts. Vertical distribution of the adults ranges from 300-500 m. Juveniles at the epipelagic stage mainly feeds on copepods, shifting the targets towards fish and large crustaceans with growth. 
+
+```{r Figure 1, fig.cap="**Figure 1: Photographs of Pentaceros wheeleri.** <br>A) Pelagic juvenile, B) pelagic subadult, C) demersal adult (fat type), D) demersal adult (lean type) (from Kiyota et al. 2016)</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+
+knitr::include_graphics("Output/NPA/Figures/NPA.jpg")
+```
+
+```{r Figure 2, fig.cap="**Figure 2: Known demersal habitats and hypothesized pelagic migration routes of Pentaceros wheeleri** (Kiyota et al. 2016 Figure 4, modified from Boehlert and Sasaki 1988).", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+
+knitr::include_graphics("Output/NPA/Figures/NPA_DistributionMap.png")
+```
+
+## Fishery
+
+Historical catches by Russia and Japan from the combined Emperor Seamounts were high and reached 100 thousand tons in 1970s, followed by a crash (Figure 3). Currently North Pacific armorhead is caught by Japan and Korea on the Emperor Seamounts using bottom trawls and gillnets. This fishery is a potential source of significant adverse impacts on vulnerable marine ecosystems due to bottom contact gear.
+
+```{r getcatchdata,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
+#NPFC DATA
+download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx", destfile="data/NPFC_catch_summary.xlsx",mode="wb", quiet = FALSE)
+
+NPFC_catch_after_2002 <- data.frame(read_excel("data/NPFC_catch_summary.xlsx", sheet = "Catch Summary", col_types = "numeric", skip = 111)) %>%
+  rename(Year=1,Japan_Trawl=2,Japan_Gillnet=3,Korea_Trawl=4,Korea_Longline=5,Russia_Trawl=6,Russia_Longline=7,Total=8) %>% 
+  pivot_longer(Japan_Trawl:Russia_Longline, names_to = c("Country", "Gear"), names_sep = "_", values_to = "Catch") %>% 
+  mutate(Species = "SA") %>% 
+  select(Year, Country, Gear, Species, Catch)
+
+NPFC_catch_before_2002 <- read.csv("data/C:/Users/10040153/Documents/R_WorkingDirectory/NPFC_Species_Summary/Historical_catch_NPA_SA_JP.csv", header = T) %>%
+  filter(Species == "NPA")
+
+NPFC_catch <- full_join(NPFC_catch_after_2002, NPFC_catch_before_2002) %>% 
+  arrange(Year)
+
+p1<-ggplot(NPFC_catch)+geom_bar(aes(x=Year,y=Catch,fill=Country),stat="identity",position="stack")+
+  ylab("Catch (tons)")+xlab("") + scale_x_continuous(breaks = seq(min(NPFC_catch$Year,na.rm=TRUE),max(NPFC_catch$Year,na.rm=TRUE),10))+
+  scale_y_continuous(expand=c(0,0),
+                     labels = label_comma())+
+  scale_fill_brewer(palette="Set1")+
+  theme_bw() +
+  theme(axis.title = element_text(size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.justification="center",
+        legend.key.size = unit(0.8, "cm"),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 12))
+
+png("Output/NPA/Figures/NPA_Catch.png",width=9, height=6,units="in",res=300)
+print(p1)
+dev.off()
+```
+
+```{r Figure 3, fig.cap="**Figure 3: Historical trends of North Pacific armorhead catches in NPFC waters.** The annual amounts of catch by each country are shown by the bar plot.", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+
+knitr::include_graphics("Output/NPA/Figures/NPA_Catch.png")
+
+```
+
+```{r effort data,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
+NPFC_effort<-data.frame(read_excel("data/NPFC_catch_summary.xlsx",sheet="Vessel Summary",skip=28,col_types='numeric')) %>% 
+  mutate_all(funs(ifelse(is.na(.),0,.))) %>% 
+  mutate(Japan=Japan...2+Japan...9, Korea=Korea...3+Korea...6, Russia=Russia...4+Russia...7+Russia...10)
+
+NPFC_effort<-data.frame(pivot_longer(NPFC_effort,Japan:Russia,names_to="Country",values_to="Effort")) %>% 
+  select(-(Japan...2:Russia...10))
+
+p1<-ggplot(NPFC_effort)+geom_bar(aes(x=Year,y=Effort,fill=Country),stat="identity",position="stack")+
+  ylab("Effort (Days fished)")+xlab("") + scale_x_continuous(breaks = seq(2001,max(NPFC_effort$Year),5))+
+  scale_y_continuous(expand=c(0,0),
+                     labels = label_comma())+
+  scale_fill_brewer(palette="Set1")+
+  theme_bw() +
+  theme(axis.title = element_text(size = 18),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.line = element_line(colour = "black"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        legend.justification="center",
+        legend.key.size = unit(0.8, "cm"),
+        legend.title = element_text(size = 15),
+        legend.text = element_text(size = 12))
+
+png("Output/NPA/Figures/NPA_Effort.png",width=9, height=6,units="in",res=300)
+p1
+dev.off()
+```
+
+```{r Figure 4, fig.cap="**Figure 4. Historical fishing effort for North Pacific armorhead.** <br>The annual fishing efforts by each country are shown by barplot. The efforts are calculated by the total fishing days operated during the year</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+
+knitr::include_graphics("Output/NPA/Figures/NPA_Effort.png")
+
+```
+
+## Assessment
+
+There is no current or accepted assessment for North Pacific armorhead.
+
+There are no biomass estimates available for this species in NPFC waters. An age- or length-structured stock assessment is unlikely to be feasible given the life history of North Pacific armorhead. Data limited approaches may be examined in the future.
+
+## Management
+
+**Active Management Measures**
+
+The following NPFC conservation and management measures pertain to this species:
+
+- CMM 2021-05 For Bottom Fisheries and Protection of VMEs in the NW Pacific Ocean
+
+- CMM 2019-06 For Bottom Fisheries and Protection of VMEs in the NE Pacific Ocean
+
+Available from <https://www.npfc.int/active-conservation-and-management-measures>
+
+```{r manaagment table,message=FALSE,warning=FALSE, results='asis', echo=FALSE}
+MngmtTable<-data.frame(
+row.names = c("Biological reference points", "Stock status","Catch limit","Harvest control rule", "Other"), 
+Status = c("Not accomplished", "Unknown", "Intermediate", "Not accomplished", "Intermediate"),
+Comment = c("Not established","Status determination criteria not established","Recommended catch, effort limits","Not established","No expansion of fishing beyond established areas"))
+
+cols <- brewer.pal(9, "Set1")
+
+MngmtTable %>% 
+  kable()%>%
+  kable_paper(full_width=F)%>%
+  row_spec(0, bold = T, color = "white")%>% 
+  column_spec(1, bold = T) %>% 
+  column_spec(2, background = c(cols[1], cols[9], cols[5], cols[1], cols[5]), color ="white") %>% 
+  kable_styling(font_size = 18, bootstrap_options = c("basic", "striped"))
+
+```
+
+In 2019, an adaptive management plan was implemented for North Pacific armorhead (NPFC-2019-SSC BF02-WP05, CMM 2019-05). This plan specifies data collection via an annual monitoring survey to be conducted in March-June each year on Koko, Yuryaki, Kammu and/or Colahan Seamounts. If the survey finds evidence of strong recruitment (see CMM 2021-05 and NPFC-2019-SSC BF02-IP01 for details) some areas in the Emperor Seamounts are closed and a 12,000 ton catch limit is encouraged. In low recruitment years, a 700 ton catch limit is encouraged.
+
+## Data Summary
+
+```{r data table, echo=FALSE}
+options(knitr.kable.NA = '')
+
+DataTable <-data.frame(read_xlsx("NPA_Species_Summary_Data.xlsx"))
+
+DataTable %>% 
+  kbl(col.names = c("Data type", "Source", "Years available", "Comment"))%>%
+  kable_paper(full_width=F) %>% 
+  row_spec(0, bold = T, color = "white") %>% 
+  column_spec(1, bold = T) %>% 
+  kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
+```
+
+## References
+
+Boehlert, G. W., and T. Sasaki. 1988. Pelagic biogeography of the armorhead, Pseudopentaceros wheeleri, and recruitment to isolated seamounts in the North Pacific Ocean. Fish. Bull. 86:453--465.
+
+Kiyota M., Nishida K., Murakami C. and Yonezaki S. 2016. History, biology, and conservation of Pacific endemics 2. The North Pacific armorhead, Pentaceros wheeleri (Hardy, 1983) (Perciformes, Pentacerotidae). Pacific Science 70(1): 1-20.
