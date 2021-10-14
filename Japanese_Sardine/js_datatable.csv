@@ -1,9 +1,20 @@
-Data Type,Source,Years Available,Comment
-Catch,China,2013-present,Historical catch data from 1968 available
-,Japan,1995-present,"Catches primarily in national waters, not convention area"
-,Russia,2012-present,
+Data,Source,Years,Comment
+Catch,China,2016-present,Catches from convention area
+,Chinese Taipei,,Minor bycatch in Pacific saury fishery
+,Japan,1995-present,"Historical catch data from 1968 available, catches in national waters"
+,Korea,,Minor bycatch in bottom trawl fishery
+,Russia,2016-present,"Catches primarily in national waters, not convention area"
 CPUE,,,not developed
-Survey,,,TBD
-Age data,,,TBD
-Length data,,,TBD
-Maturity/fecundity,,,TBD
+Survey,Japan,,Pre-recruit survey
+,Japan,,Juvenile survey
+,Japan,,Monthly egg and larval survey
+,Russia,2010-present,Acoustic-trawl survey
+Age data,China,2020,Commercial catch
+,Japan,,Commercial and survey catches
+,Russia,,Commercial and survey catches
+Length data,China,2020,Commerical catch
+,Japan,,Commercial and survey catches
+,Russia,,Commercial and survey catches
+Maturity/fecundity,China,2020,Commercial catch
+,Japan,,Commercial and survey catches
+,Russia,,Commercial and survey catches
