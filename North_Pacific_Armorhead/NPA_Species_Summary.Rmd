@@ -13,14 +13,14 @@ output:
     df_print: paged
 always_allow_html: yes
 ---
-```{r setup, echo=FALSE, include=FALSE}
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file(), 
+                     echo = FALSE, warning = FALSE, message = FALSE)
 out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(tinytex.verbose = TRUE)
 ```
 
-```{r load package, include=FALSE}
+```{r loadPackages, include=FALSE}
 library(tidyverse)
 library(readxl)
 library(rgdal)
@@ -42,12 +42,12 @@ library(scales)
 
 North Pacific armorhead has a unique life history consisting of a pelagic larva phase and a demersal adult stage on the seamounts (Kiyota et al. 2016). Distribution of the larva includes Gulf of Alaska to North Pacific Ocean off central California and south of Japan, with center of abundance at the Emperor Seamounts. Following their settlements in the seamounts, adults make morphological changes from the "fat" type to the "lean" type concurrent with their dietary shifts. Vertical distribution of the adults ranges from 300-500 m. Juveniles at the epipelagic stage mainly feeds on copepods, shifting the targets towards fish and large crustaceans with growth. 
 
-```{r Figure 1, fig.cap="**Figure 1: Photographs of Pentaceros wheeleri.** <br>A) Pelagic juvenile, B) pelagic subadult, C) demersal adult (fat type), D) demersal adult (lean type) (from Kiyota et al. 2016)</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+```{r Figure 1, fig.cap="**Figure 1: Photographs of Pentaceros wheeleri.** <br>A) Pelagic juvenile, B) pelagic subadult, C) demersal adult (fat type), D) demersal adult (lean type) (from Kiyota et al. 2016)</br>", out.width="70%", out.height="70%", fig.align='center'}
 
 knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA.jpg")
 ```
 
-```{r Figure 2, fig.cap="**Figure 2: Known demersal habitats and hypothesized pelagic migration routes of Pentaceros wheeleri** (Kiyota et al. 2016 Figure 4, modified from Boehlert and Sasaki 1988).", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+```{r Figure 2, fig.cap="**Figure 2: Known demersal habitats and hypothesized pelagic migration routes of Pentaceros wheeleri** (Kiyota et al. 2016 Figure 4, modified from Boehlert and Sasaki 1988).", out.width="80%", out.height="80%", fig.align='center'}
 
 knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_DistributionMap.png")
 ```
@@ -56,7 +56,7 @@ knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_DistributionMap.png
 
 Historical catches by Russia and Japan from the combined Emperor Seamounts were high and reached 100 thousand tons in 1970s, followed by a crash (Figure 3). Currently North Pacific armorhead is caught by Japan and Korea on the Emperor Seamounts using bottom trawls and gillnets. This fishery is a potential source of significant adverse impacts on vulnerable marine ecosystems due to bottom contact gear.
 
-```{r getcatchdata,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
+```{r getcatchdata,message=FALSE,warning=FALSE,results="hide"}
 #NPFC DATA
 download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx", destfile="data/NPFC_catch_summary.xlsx",mode="wb", quiet = FALSE)
 
@@ -96,13 +96,13 @@ print(p1)
 dev.off()
 ```
 
-```{r Figure 3, fig.cap="**Figure 3: Historical trends of North Pacific armorhead catches in NPFC waters.** The annual amounts of catch by each country are shown by the bar plot.", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+```{r Figure 3, fig.cap="**Figure 3: Historical trends of North Pacific armorhead catches in NPFC waters.** The annual amounts of catch by each country are shown by the bar plot.", out.width="80%", out.height="80%", fig.align='center'}
 
 knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_Catch.png")
 
 ```
 
-```{r effort data,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
+```{r effort data,message=FALSE,warning=FALSE,results="hide"}
 NPFC_effort<-data.frame(read_excel("data/NPFC_catch_summary.xlsx",sheet="Vessel Summary",skip=28,col_types='numeric')) %>% 
   mutate_all(funs(ifelse(is.na(.),0,.))) %>% 
   mutate(Japan=Japan...2+Japan...9, Korea=Korea...3+Korea...6, Russia=Russia...4+Russia...7+Russia...10)
@@ -134,7 +134,7 @@ p1
 dev.off()
 ```
 
-```{r Figure 4, fig.cap="**Figure 4. Historical fishing effort for North Pacific armorhead.** <br>The annual fishing efforts by each country are shown by barplot. The efforts are calculated by the total fishing days operated during the year</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+```{r Figure 4, fig.cap="**Figure 4. Historical fishing effort for North Pacific armorhead.** <br>The annual fishing efforts by each country are shown by barplot. The efforts are calculated by the total fishing days operated during the year</br>", out.width="70%", out.height="70%", fig.align='center'}
 
 knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_Effort.png")
 
@@ -158,7 +158,7 @@ The following NPFC conservation and management measures pertain to this species:
 
 Available from <https://www.npfc.int/active-conservation-and-management-measures>
 
-```{r manaagment table,message=FALSE,warning=FALSE, results='asis', echo=FALSE}
+```{r manaagment table,message=FALSE,warning=FALSE, results='asis'}
 MngmtTable<-data.frame(
 row.names = c("Biological reference points", "Stock status","Catch limit","Harvest control rule", "Other"), 
 Status = c("Not accomplished", "Unknown", "Intermediate", "Not accomplished", "Intermediate"),
@@ -180,7 +180,7 @@ In 2019, an adaptive management plan was implemented for North Pacific armorhead
 
 ## Data Summary
 
-```{r data table, echo=FALSE}
+```{r data table}
 options(knitr.kable.NA = '')
 
 DataTable <-data.frame(read_xlsx("NPA_Species_Summary_Data.xlsx"))
