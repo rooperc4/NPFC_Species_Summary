@@ -1,0 +1,84 @@
+---
+title: "NPFC_Species_Summary"
+author: "Chris Rooper"
+date: "5/27/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(raster)
+library(BottomFishingFootprint)
+library(rgdal)
+library(maptools)
+library(gstat)
+library(rgeos)
+library(proj4)
+library(sp)
+library(maps)
+library(RODBC)
+library(viridis)
+library(plyr)
+library(ggmap)
+library(ggplot2)
+library(gridExtra)
+library(tidyr)
+source("C:/Users/rooperc/Documents/Chris Work Stuff/R Software Help and Functions/Miscellaneous Functions/MappingExtras.R")
+
+
+```
+
+Download the data from https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Japanese%20Sardine.xlsx
+
+```{r download data}
+
+
+```
+
+
+```{r catchgraph}
+catch<-read.csv("BF Catch.csv",header=TRUE)
+catch$Japan<-catch[,3]+catch[,4]
+catch$Korea<-catch[,5]+catch[,6]
+catch$Russia<-catch[,7]+catch[,8]
+catch<-catch[,-(3:8)]
+catch<-gather(catch,key=Member,value=Catch,Total:Russia)
+catchSA<-subset(catch,catch$Species=="Splendid Alfonsino")
+p1<-ggplot(catchSA)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ggtitle("North Pacific Armorhead")+ylab("Catch (*1,000)")
+p1
+
+catchNPA<-subset(catch,catch$Species!="Splendid Alfonsino")
+p2<-ggplot(catchNPA)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ggtitle("North Pacific Armorhead")+ylab("Catch (*1,000)")
+p2
+
+png("catch.png",width=6, height=6,units="in",res=300)
+p3<-ggplot(catch)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ylab("Catch (*1,000)")+xlab("Year")+scale_x_continuous(breaks=seq(2000,2020,2))#+theme(axis.text.x=element_text(angle=90))
+p3+facet_wrap(~Species,nrow=2,scales="free")
+dev.off()
+
+effort<-read.csv("Effort.csv",header=TRUE)
+effort<-gather(effort,key=Member,value=Days,Japan:Russia)
+head(effort)
+
+catch_and_effort<-merge(catch,effort,by.x=c("Fishery","Member"),by.y=c("Year","Member"),all.x=TRUE)
+head(catch_and_effort)
+catch_and_effort$CPUE<-catch_and_effort$Catch/catch_and_effort$Days
+
+png("catch_and_effort.png",width=6, height=6,units="in",res=300)
+p3<-ggplot(catch)+geom_line(aes(x=Fishery,y=Catch,color=Member))+ylab("Catch (*1,000)")+xlab("Year")+scale_x_continuous(breaks=seq(2000,2020,2))#+theme(axis.text.x=element_text(angle=90))
+p3+facet_wrap(~Species,nrow=2,scales="free")
+dev.off()
+
+```
+```{r cars}
+newproj<-"+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+
+Emperor1<-raster("D:/BC GIS/GEBCO_Bathy/GEBCO_Emperor.tif")
+Emperor<-projectRaster(Emperor1,crs=CRS(newproj),filename="D:/BC GIS/PICESWG32/projected_bathy",progress="text",overwrite=TRUE)
+
+Emperor<-raster("D:/BC GIS/PICESWG32/projected_bathy")
+Fished_seamounts<-read.csv("seamounts.csv",header=TRUE)
+plot(Emperor1)
+points(cbind(Fished_seamounts$Longitude,Fished_seamounts$Latitude))
+
+```
+

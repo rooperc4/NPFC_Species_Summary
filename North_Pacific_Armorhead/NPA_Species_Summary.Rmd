@@ -1,126 +1,185 @@
 ---
-title: |
-  | Species Summary
-  | North Pacific Armorhead
-author: '*NPFC Bottom Fisheries Small Working Group*'
+title: "North Pacific Armorhead"
+subtitle: "Species Summary"
+author: '*NPFC SWG-NPA-SA*'
 date: '*`r Sys.Date()`*'
 output:
   prettydoc::html_pretty:
     theme: architect
     highlight: github
-  pdf_document:
-    default
-  df_print: default
+  html_document:
+    df_print: paged
+    code_folding: hide
+  word_document: default
 always_allow_html: yes
 ---
-
-```{r setup, echo=FALSE}
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "C:/Users/10040153/Documents/R_WorkingDirectory/NPFC_Species_Summary")
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
-knitr::opts_chunk$set(warning = FALSE, mesNPAge = FALSE) 
 options(tinytex.verbose = TRUE)
 ```
 
-```{r, echo=FALSE}
-out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
-```
-
-```{r load package, include=FALSE}
+```{r loadPackages, include=FALSE}
+library(tidyverse)
+library(readxl)
 library(rgdal)
 library(rgeos)
 library(sp)
-library(ggplot2)
-library(rfisheries)
-library(tidyverse)
 library(rnaturalearth)
 library(sf)
-library(readxl)
 library(kableExtra)
 library(GLDEX)
 library(RColorBrewer)
+library(scales)
+library(proj4)
 ```
 
-# North Pacific Armorhead (*Pentaceros wheeleri*)
+# North Pacific armorhead (*Pentaceros wheeleri*)
 
-**Common names:** Pelagic armorhead, Slender armorhead (English): , 胸五棘鯛 (Chinese); クサカリツボダイ (Japanese); Minsajagu (Korean); Рыба-кабан (Russian)
+**Common names:** Pelagic armorhead, Slender armorhead (English); 五棘鲷 (Chinese); クサカリツボダイ (Japanese); 북방돗돔 (Korean);  кабан-рыба (Russian)
 
 ## Biological Information
 
-Distribution includes North Pacific -- Gulf of Alaska to North Pacific Ocean off central California and south of Japan, with center of abundance at the seamounts of the southern Emperor-northern Hawaiian Ridge within the Convention area. North Pacific Armorhead (NPA) have a unique life history with extended pelagic phase (2+ years), followed by morphometric changes concurrent with recruitment to a demersal stage on seamounts.
+North Pacific armorhead has a unique life history consisting of a pelagic larva phase and a demersal adult stage on the seamounts (Kiyota et al. 2016). Distribution of the larva includes Gulf of Alaska to North Pacific Ocean off central California and south of Japan, with center of abundance at the Emperor Seamounts. Following their settlements in the seamounts, adults make morphological changes from the "fat" type to the "lean" type concurrent with their dietary shifts. Vertical distribution of the adults ranges from 300-500 m. Juveniles at the epipelagic stage mainly feeds on copepods, shifting the targets towards fish and large crustaceans with growth. 
 
-```{r picture, fig.cap="**Figure 1: Photographs of Pentaceros wheeleri. A) Pelagic juvenile, B) pelagic subadult, C) demersal adult (fat type), D) demersal adult (lean type) (from Kiyota et al. 2016)</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
-
-knitr::include_graphics("Figures/NPA.jpg")
+```{r Figure 1, fig.cap="**Figure 1: Photographs of Pentaceros wheeleri.** <br>A) Pelagic juvenile, B) pelagic subadult, C) demersal adult (fat type), D) demersal adult (lean type) (from Kiyota et al. 2016)</br>", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA.jpg")
 ```
 
-```{r picture2, fig.cap="**Figure 2: Known demersal habitats and hypothesized pelagic migration routes of Pentaceros wheeleri (Kiyota et al. 2016 Figure 4, modified from Boehlert and Sasaki 1988).</br>", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+```{r Figure 2, fig.cap="**Figure 2: Known demersal habitats and hypothesized pelagic migration routes of Pentaceros wheeleri** (Kiyota et al. 2016 Figure 4, modified from Boehlert and Sasaki 1988).", out.width="80%", out.height="80%", fig.align='center'}
 
-knitr::include_graphics("Figures/NPA_DistributionMap.jpg")
+knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_DistributionMap.png")
 ```
 
 ## Fishery
 
-Historical catches (Russia and Japan) from the combined Emperor Seamounts were high and reached 1 million mt in 1975, followed by a crash (Kiyota et al. 2016). Currently NPA is caught by Japan and Korea on the Emperor Seamounts using bottom trawls and gillnets. This fishery is a potential source of SAI for vulnerable marine ecosystems due to bottom contact gear. Observers are required for NPFC bottomfishing (per CMM 2019-05).
+Historical catches by Russia and Japan from the combined Emperor Seamounts were high and reached 100 thousand tons in 1970s, followed by a crash (Figure 3). Currently North Pacific armorhead is caught by Japan and Korea on the Emperor Seamounts using bottom trawls and gillnets. This fishery is a potential source of significant adverse impacts on vulnerable marine ecosystems due to bottom contact gear.
 
-Fishing typically begins in January and extends until [need date].
+```{r getCatchData, message=FALSE, warning=FALSE, results="hide"}
+# get the historical catch record after 2002 from the NPFC website "https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx"
+catch_after_2002 <- data.frame(read_excel("data/NPFC_catch_summary.xlsx", 
+                                               sheet = "Catch Summary", 
+                                               col_types = "numeric", 
+                                               skip = 111)) %>%
+  rename(Year=1,Japan_Trawl=2,Japan_Gillnet=3,
+         Korea_Trawl=4,Korea_Longline=5,Russia_Trawl=6,
+         Russia_Longline=7,Total=8) %>% 
+  pivot_longer(Japan_Trawl:Russia_Longline, 
+               names_to = c("Country", "Gear"), 
+               names_sep = "_", values_to = "Catch") %>% 
+  filter(Year > 0) %>% # omit "NA"
+  mutate(Species = "SA") %>% 
+  select(Year, Country, Gear, Species, Catch)
 
-```{r getcatchdata,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
-#FAO Data
-#species = rfisheries::of_species_codes()
-#species %>% 
-#  filter(str_detect(scientific_name %>% tolower(), pattern = "sardinops"))
+## get the species data for SA including their synonyms
+species_code_SA <- read.csv("data/FAO/CL_FI_SPECIES_GROUPS.csv", header = T) %>% 
+  filter(Name_En %in% c("Slender armorhead",
+                        "Pelagic armourhead",
+                        "Longfin armorhead")) %>%  
+  select(X3A_Code, Scientific_Name, Name_En)
 
-#NPFC DATA
-download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx", destfile="NPA_catch.xlsx",mode="wb", quiet = FALSE)
+## get the country data for NPFC members
+country_code_NPFC <- read.csv("data/FAO/CL_FI_COUNTRY_GROUPS.csv", header = T) %>% 
+  filter(ISO2_Code %in% c("SU", "RU", "JP", "KR")) %>%  
+  select(UN_Code, ISO2_Code) # get the country data for NPFC members 
 
-catch<-data.frame(read_xlsx("NPA_catch.xlsx",sheet="Catch Summary",col_types = "numeric", skip=111)) %>% 
-  rename(Year=1,Japan_Trawl=2,Japan_Gillnet=3,Korea_Trawl=4,Korea_Longline=5,Russia_Trawl=6,Russia_Longline=7,Total=8) %>% 
-  mutate(Japan=Japan_Trawl+Japan_Gillnet,Korea=Korea_Trawl+Korea_Longline,Russia=Russia_Trawl+Russia_Longline) %>% 
-  select(Year,Japan:Russia) %>% 
-  filter(Year>0)
+## get the FAO catch data and bind it with species code and country code
+FAO_catch <- read.csv("data/FAO/CAPTURE_QUANTITY.csv", header = T) %>% 
+  left_join(species_code_SA, by = c("SPECIES.ALPHA_3_CODE" = "X3A_Code")) %>% 
+  left_join(country_code_NPFC, by = c("COUNTRY.UN_CODE" = "UN_Code")) %>% 
+  select(- COUNTRY.UN_CODE)
 
-catch<-data.frame(pivot_longer(catch,Japan:Russia,names_to="Member",values_to="Catch"))
-minyear<-min(catch$Year,na.rm=TRUE)
-catch$Member<-factor(catch$Member,levels=c("Japan", "Korea", "Russia"))
+## filter the catch data by the NPFC convention area, species and NPFC members
+FAO_catch_NPFC_area <- FAO_catch %>% 
+  filter(AREA.CODE == "61") %>%
+  filter(SPECIES.ALPHA_3_CODE %in% species_code_SA$X3A_Code) %>% 
+  filter(ISO2_Code %in% country_code_NPFC$ISO2_Code)
 
-p1<-ggplot(catch)+geom_bar(aes(x=Year,y=Catch,fill=Member),stat="identity",position="stack")+
-  ylab("Catch (tons)")+xlab("") + scale_x_continuous(breaks = seq(min(catch$Year,na.rm=TRUE),max(catch$Year,na.rm=TRUE),10))+
-  scale_y_continuous(expand=c(0,0))+scale_fill_brewer(palette="Set1")+
+# merge the data from Russia and Soviet
+FAO_catch_Russia_Japan <- FAO_catch_NPFC_area %>% 
+  filter(SPECIES.ALPHA_3_CODE == "EDJ") %>% 
+  pivot_wider(names_from = ISO2_Code, values_from = VALUE) %>% 
+  mutate_all(., ~replace(., is.na(.), 0)) %>% 
+  mutate(Russia = RU + SU) %>% 
+  select(-RU, -SU) %>%
+  rename(Japan = JP) %>% 
+  pivot_longer(Japan:Russia,names_to = "COUNTRY", values_to = "VALUE")
+
+catch_before_2001_Russia <- FAO_catch_Russia_Japan %>% 
+  filter(PERIOD <= 2001) %>% 
+  filter(COUNTRY == "Russia") %>% 
+  select(PERIOD, COUNTRY, MEASURE, SPECIES.ALPHA_3_CODE, VALUE) %>% 
+  rename(Year = 1, Country = 2, Gear = 3, Species = 4, Catch = 5) %>% 
+  mutate(Gear = "Trawl", Species = "NPA")
+
+## get the historical catch record before 2001 for Japan from "Historical_catch_NPA_SA_JP.csv" due to incorrect values of the FAO statistics
+catch_before_2001_Japan <- read.csv("data/Historical_catch_NPA_SA_JP.csv", header = T) %>%
+  filter(Species == "NPA")
+
+## merge the Japan data with Russia and Korea data
+catch_before_2001 <- full_join(catch_before_2001_Russia, catch_before_2001_Japan)
+
+## merge all the data into a single data frame
+NPFC_catch <- full_join(catch_after_2002, catch_before_2001) %>% 
+  arrange(Year) %>% 
+  mutate(Country = str_replace(Country, "Russia", "USSR/Russia"))
+NPFC_catch$Country <- factor(NPFC_catch$Country, levels = c("Japan", "Korea", "USSR/Russia"))
+
+
+# plotting
+max_annual_catch <- max(NPFC_catch %>% group_by(Year) %>% summarise(sum = sum(Catch)))
+
+p1 <- ggplot(NPFC_catch) +
+  geom_bar(aes(x = Year, y = Catch, fill = Country), stat = "identity", position = "stack") +
+  ylab("Catch (tons)") +
+  xlab("") +
+  scale_x_continuous(breaks = seq(first(NPFC_catch[NPFC_catch$Catch>0,]$Year), max(NPFC_catch$Year, na.rm = T), 10),
+                     limits = c(first(NPFC_catch[NPFC_catch$Catch>0,]$Year-1), max(NPFC_catch$Year, na.rm = T)+1)) +
+  scale_y_continuous(breaks = seq(0, max_annual_catch, 10000),
+                     expand = c(0, 0),
+                     labels = label_comma()) +
+  scale_fill_brewer(palette = "Set1") +
   theme_bw() +
-  theme(axis.title = element_text(size = 18),
-        axis.text.x = element_text(size = 12),
-        axis.text.y = element_text(size = 12),
-        axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        legend.justification="center",
-        legend.key.size = unit(0.8, "cm"),
-        legend.title = element_text(size = 15),
-        legend.text = element_text(size = 12))
+  theme(
+    axis.title = element_text(size = 18),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.line = element_line(colour = "black"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    legend.justification = "center",
+    legend.key.size = unit(0.8, "cm"),
+    legend.title = element_text(size = 15),
+    legend.text = element_text(size = 12)
+  )
 
-png("Figures/NPA_Catch.png",width=9, height=6,units="in",res=300)
+png("North_Pacific_Armorhead/Figures/NPA_Catch.png",width=9, height=6,units="in",res=300)
 print(p1)
 dev.off()
 ```
 
-```{r picture3, fig.cap="**Figure 3: Catch trends of North Pacific Armorhead over the past two decades.** The annual amounts of catch for alfonsino by each Member are shown by the bar plot.", out.width="80%", out.height="80%", fig.align='center', echo=FALSE}
+```{r Figure 3, fig.cap="**Figure 3: Historical trends of North Pacific armorhead catches in NPFC waters.** The annual amounts of catch by each country are shown by the bar plot.", out.width="80%", out.height="80%", fig.align='center'}
 
-knitr::include_graphics("Figures/NPA_Catch.png")
+knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_Catch.png")
 
 ```
 
-```{r effort data,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
-NPFC_effort<-data.frame(read_xlsx("NPA_catch.xlsx",sheet="Vessel Summary",skip=28,col_types='numeric')) %>% 
+```{r effort data,message=FALSE,warning=FALSE,results="hide"}
+NPFC_effort<-data.frame(read_excel("data/NPFC_catch_summary.xlsx",sheet="Vessel Summary",skip=28,col_types='numeric')) %>% 
   mutate_all(funs(ifelse(is.na(.),0,.))) %>% 
   mutate(Japan=Japan...2+Japan...9, Korea=Korea...3+Korea...6, Russia=Russia...4+Russia...7+Russia...10)
 
-NPFC_effort<-data.frame(pivot_longer(NPFC_effort,Japan:Russia,names_to="Member",values_to="Effort")) %>% 
+NPFC_effort<-data.frame(pivot_longer(NPFC_effort,Japan:Russia,names_to="Country",values_to="Effort")) %>% 
   select(-(Japan...2:Russia...10))
 
-p1<-ggplot(NPFC_effort)+geom_bar(aes(x=Year,y=Effort,fill=Member),stat="identity",position="stack")+
+p1<-ggplot(NPFC_effort)+geom_bar(aes(x=Year,y=Effort,fill=Country),stat="identity",position="stack")+
   ylab("Effort (Days fished)")+xlab("") + scale_x_continuous(breaks = seq(2001,max(NPFC_effort$Year),5))+
-  scale_y_continuous(expand=c(0,0))+scale_fill_brewer(palette="Set1")+
+  scale_y_continuous(expand=c(0,0),
+                     labels = label_comma())+
+  scale_fill_brewer(palette="Set1")+
   theme_bw() +
   theme(axis.title = element_text(size = 18),
         axis.text.x = element_text(size = 12),
@@ -135,36 +194,36 @@ p1<-ggplot(NPFC_effort)+geom_bar(aes(x=Year,y=Effort,fill=Member),stat="identity
         legend.title = element_text(size = 15),
         legend.text = element_text(size = 12))
 
-png("Figures/NPA_Effort.png",width=9, height=6,units="in",res=300)
+png("North_Pacific_Armorhead/Figures/NPA_Effort.png",width=9, height=6,units="in",res=300)
 p1
 dev.off()
 ```
 
-```{r picture1, fig.cap="**Figure 4. Historical fishing effort for North Pacific Armorhead.**", out.width="70%", out.height="70%", fig.align='center', echo=FALSE}
+```{r Figure 4, fig.cap="**Figure 4. Historical fishing effort for North Pacific armorhead.** <br>The annual fishing efforts by each country are shown by barplot. The efforts are calculated by the total fishing days operated during the year</br>", out.width="70%", out.height="70%", fig.align='center'}
 
-knitr::include_graphics("Figures/NPA_Effort.png")
+knitr::include_graphics("North_Pacific_Armorhead/Figures/NPA_Effort.png")
 
 ```
 
 ## Assessment
 
-There is no current or accepted assessment for this species.
+There is no current or accepted assessment for North Pacific armorhead.
 
-There are no biomass estimates available for NPA in NPFC waters. An age- or length-structured stock assessment is unlikely to be feasible given the life history of NPA (citation for more information). Data limited approaches may be examined in the future.
+There are no biomass estimates available for this species in NPFC waters. An age- or length-structured stock assessment is unlikely to be feasible given the life history of North Pacific armorhead. Data limited approaches may be examined in the future.
 
 ## Management
 
 **Active Management Measures**
 
-The following NPFMC conservation and management measures pertain to this species:
+The following NPFC conservation and management measures pertain to this species:
 
--   CMM 2019-05 For Bottom Fisheries and Protection of VMEs in the NW Pacific Ocean
+- CMM 2021-05 For Bottom Fisheries and Protection of VMEs in the NW Pacific Ocean
 
--   CMM 2019-06 For Bottom Fisheries and Protection of VMEs in the NE Pacific Ocean
+- CMM 2019-06 For Bottom Fisheries and Protection of VMEs in the NE Pacific Ocean
 
 Available from <https://www.npfc.int/active-conservation-and-management-measures>
 
-```{r manaagment table,message=FALSE,warning=FALSE, results='asis', echo=FALSE}
+```{r manaagment table,message=FALSE,warning=FALSE, results='asis'}
 MngmtTable<-data.frame(
 row.names = c("Biological reference points", "Stock status","Catch limit","Harvest control rule", "Other"), 
 Status = c("Not accomplished", "Unknown", "Intermediate", "Not accomplished", "Intermediate"),
@@ -172,35 +231,31 @@ Comment = c("Not established","Status determination criteria not established","R
 
 cols <- brewer.pal(9, "Set1")
 
-switch (out_type,
-      html = MngmtTable %>% 
-        kable(caption = '<font size= "5">Management Summary</font>')%>% 
-        kable_paper(full_width=F)%>%
-        row_spec(0, bold = T, color = "white")%>% 
-        column_spec(1, bold = T) %>% 
-        column_spec(2, background = c(cols[1], cols[9], cols[5], cols[1], cols[5]), color = "white") %>% 
-        kable_styling(font_size = 18, bootstrap_options = c("basic", "striped")
-        ))
+MngmtTable %>% 
+  kable()%>%
+  kable_paper(full_width=F)%>%
+  row_spec(0, bold = T, color = "white")%>% 
+  column_spec(1, bold = T) %>% 
+  column_spec(2, background = c(cols[1], cols[9], cols[5], cols[1], cols[5]), color ="white") %>% 
+  kable_styling(font_size = 18, bootstrap_options = c("basic", "striped"))
 
 ```
 
-In 2019 an adaptive management plan was implemented for NPA (NPFC-2019-SSC BF02-WP05, CMM 2019-05). This plan specifies data collection via an annual monitoring survey to be conducted in March-June each year on Koko and Kammu Seamounts. If the survey finds evidence of strong recruitment (see CMM 2019-05 and NPFC-2019-SSC BF02-IP01 for details) some area in the Emperor Seamounts are closed and a 12,000 ton catch limit is encouraged. In low recruitment years, a 700 ton catch limit is encouraged.
+In 2019, an adaptive management plan was implemented for North Pacific armorhead (NPFC-2019-SSC BF02-WP05, CMM 2019-05). This plan specifies data collection via an annual monitoring survey to be conducted in March-June each year on Koko, Yuryaki, Kammu and/or Colahan Seamounts. If the survey finds evidence of strong recruitment (see CMM 2021-05 and NPFC-2019-SSC BF02-IP01 for details) some areas in the Emperor Seamounts are closed and a 12,000 ton catch limit is encouraged. In low recruitment years, a 700 ton catch limit is encouraged.
 
 ## Data Summary
 
-```{r data table, echo=FALSE}
+```{r data table}
 options(knitr.kable.NA = '')
 
-DataTable <-data.frame(read_xlsx("NPA_Species_Summary_Data.xlsx"))
+DataTable <-data.frame(read_xlsx("data/NPA_Species_Summary_DataTable.xlsx"))
 
-switch (out_type,
-  html = DataTable %>% 
-    kbl(col.names = c("Data type", "Source", "Years available", "Comment"))%>% 
+DataTable %>% 
+  kbl(col.names = c("Data type", "Source", "Years available", "Comment"))%>%
   kable_paper(full_width=F) %>% 
-    row_spec(0, bold = T, color = "white") %>% 
-    column_spec(3, width = "15em") %>% 
-    kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
-)
+  row_spec(0, bold = T, color = "white") %>% 
+  column_spec(1, bold = T) %>% 
+  kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
 ```
 
 ## References

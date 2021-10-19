@@ -1,0 +1,52 @@
+---
+title: "Untitled"
+author: "Chris Rooper"
+date: "7/2/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gfdata)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+chub<-get_catch("Scomber japonicus")
+npa<-get_catch("Pentaceros wheeleri")
+sa<-get_catch("Beryx splendens")
+ps<-get_catch("Cololabis saira")
+nfs<-get_catch("Ommastrephes bartramii")
+jfs<-get_catch("Todarodes pacificus")
+spotted<-get_catch("Scomber australasicus")
+js<-get_catch("Sardinops melanostictus")
+
+
+chub<-get_survey_sets("Scomber japonicus")
+npa<-get_survey_sets("Pentaceros wheeleri")
+sa<-get_survey_sets("Beryx splendens")
+ps<-get_survey_sets("Cololabis saira")
+nfs<-get_survey_sets("Ommastrephes bartramii")
+jfs<-get_survey_sets("Todarodes pacificus")
+spotted<-get_survey_sets("Scomber australasicus")
+js<-get_survey_sets("Sardinops melanostictus")
+
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
