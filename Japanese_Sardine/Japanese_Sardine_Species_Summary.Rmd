@@ -4,15 +4,13 @@ title: |
   | Japanese Sardine
 author: '*NPFC Japanese Sardine Small Working Group*'
 date: '*`r Sys.Date()`*'
-output:
+output: 
   prettydoc::html_pretty:
     theme: architect
     highlight: github
-  html_document:
-    df_print: paged
-  df_print: default
-  word_document: default
-  pdf_document: default
+  pdf_document:
+    default
+  df_print: paged
 always_allow_html: yes
 bibliography: JapaneseSardinebibliography.bib
 ---
@@ -46,13 +44,19 @@ library(RColorBrewer)
 
 # Japanese sardine (*Sardinops melanostictus*)
 
-**Common names:** (Chinese); Japanese Sardine; (Japanese); (Korean); (Russian) - Need names in each language
+**Common names:** 
 
-**Other common names:**
+拟沙丁鱼, Ni Sha Ding Yu (China)
 
-```{r picture, fig.cap="Figure 1. Placeholder picture of Pacific Sardine.", echo=FALSE}
+マイワシ, Maiwashi (Japan)
 
-knitr::include_graphics("Figures/pacific_sardine.png")
+정어리, Jeong-eoli (Korea)
+
+(Russia)
+
+```{r picture, fig.cap="Figure 1. Japanese Sardine (*Sardinops melanostictus*).", echo=FALSE}
+
+knitr::include_graphics("Figures/japanesesardine.jpg")
 
 ```
 ## Management
@@ -95,7 +99,7 @@ Japan conducts an assessment of the Japanese Sardine stock using VPA and a numbe
 
 ## Data
 ### Surveys
-Japan conducts three surveys that estimate recruitment for a number of pelagic species, including Japanese Sardine (Table 1). The surveys target pre-recruits and juveniles to determine an index of recruitment. Japan also conducts a monthly egg and larval survey that is used to estimate spawning stock biomass. Surveys are conducted in spring (1995-2020), summer (2001-2020) and fall (2005-2020) at 30-80 stations per year. The survey protocol can be found at [website?]. Russia has conducted a summertime acoustic-trawl survey since 2010 that examines mid-water and upper epipelagic species including Japanese Sardine. 
+Japan conducts three surveys that estimate recruitment for a number of pelagic species, including Japanese Sardine (Table 1). The surveys target pre-recruits and juveniles to determine an index of recruitment. Japan also conducts a monthly egg and larval survey that is used to estimate spawning stock biomass. Surveys are conducted in spring (1995-2020), summer (2001-2020) and fall (2005-2020) at 30-80 stations per year. The survey protocol can be found at [@Oozeki2007]. Russia has conducted a summertime acoustic-trawl survey since 2010 that examines mid-water and upper epipelagic species including Japanese Sardine. 
 
 ### Fishery
 
@@ -227,11 +231,9 @@ None
 Japanese sardine (*Sardinops melanostichtus*; Figure 1) are a pelagic species that occurs in large migratory schools in the coastal waters of China, Chinese Taipei, Japan, Korea and Russia (Figure 2). They generally migrate from the south to the north during summer, returning to inshore areas in the south to spawn in the winter. Japanese sardine feed mainly on zooplankton and phytoplankton. 
 
 ### Life history
-Japanese sardine are short-lived and fast growing, maturing early at 2-years old. Their maximum length is ~24 cm and their maximum reported age is 25 years [@Whitehead1985]. Their growth rates and spawning patterns are highly influenced by the environment [@Niino2021]
+Japanese sardine are short-lived and fast growing, maturing early at 2-years old. Their maximum length is ~24 cm and their maximum reported age is 25 years (Whitehead 1985). Their growth rates and spawning patterns are highly influenced by the environment [@Niino2021]
 
 Taxonomically, the Japanese sardine are closely related to other species around the globe inlcuding Sardinops from southern Africa, Australia, South America and California. 
-
-[Insert additional text here]
 
 ```{r MapTheDistribution,message=FALSE,warning=FALSE,results="hide", echo=FALSE}
 #IMPORT DISTRIBUTION POINTS (THESE ARE A PLACEHOLDER FROM AQUAMAPS)
@@ -285,3 +287,4 @@ knitr::include_graphics("Figures/Figure2.png")
 Kaschner, K., Kesner-Reyes, K., Garilao, C., Segschneider, J., Rius-Barile, J. Rees, T., & Froese, R. 2019. AquaMaps: Predicted range maps for aquatic species. Data retrieved from https://www.aquamaps.org.
 Karthik Ram, Carl Boettiger and Andrew Dyck (2013). rfisheries: R   interface for fisheries data. R package version 0.1.
   http://CRAN.R-project.org/package=rfisheries
+Whitehead, P.J.P., 1985. FAO Species Catalogue. Vol. 7. Clupeoid fishes of the world (suborder Clupeoidei). An annotated and illustrated catalogue of the herrings, sardines, pilchards, sprats, shads, anchovies and wolf-herrings. FAO Fish. Synop. 125(7/1):1-303. Rome: FAO.
