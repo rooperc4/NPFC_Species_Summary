@@ -1,22 +1,21 @@
 ---
-title: |
-  | Species Summary
-  | Splendid alfonsino
-author: '*NPFC Bottom Fisheries Small Working Group*'
+title: "Splendid Alfonsino"
+subtitle: "Species Summary"
+author: '*NPFC SWG-NPA-SA*'
 date: '*`r Sys.Date()`*'
 output:
   prettydoc::html_pretty:
     theme: architect
     highlight: github
-  word_document: default
   html_document:
     df_print: paged
+  word_document: default
 always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file(), 
-                     echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_knit$set(root.dir = "C:/Users/10040153/Documents/R_WorkingDirectory/NPFC_Species_Summary")
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
 options(tinytex.verbose = TRUE)
 ```
@@ -47,7 +46,7 @@ Global distribution ranges from tropical to temperate oceans. Historical catch r
 
 ```{r Figure 1, fig.cap="**Figure 1: Photographs of Beryx splendens on different developmental stages** <br>A) postlarva, B) juvenile, C) young, D) adult (from Watari et al. 2017)</br>", out.width="70%", out.height="70%", fig.align='center'}
 
-knitr::include_graphics("Splendid_Alfonsino/Figures/SA.jpg")
+knitr::include_graphics("Splendid_Alfonsino/Figures/SA.jpg", error = FALSE)
 
 ```
 
@@ -116,18 +115,21 @@ Historical catch record (Figure 3) shows the highest catch proportion by Japan, 
 Size composition analysis from the catch data by Japanese trawlers suggests the substantial decrease in size of fish in catches over the past decade, raising the concern about recruitment overfishing (Sawada et al. 2018).
 
 ```{r getCatchData,results="hide"}
-# get the historical catch record after 2002 from the NPFC website 
-download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx", destfile = "data/NPFC_catch_summary.xlsx", mode = "wb", quiet = FALSE)
-
-NPFC_catch_after_2002 <- data.frame(read_excel("data/NPFC_catch_summary.xlsx", sheet = "Catch Summary", col_types = "numeric", skip = 134)) %>%
-  rename(Year = 1, Japan_Trawl = 2, Japan_Gillnet = 3, Korea_Trawl = 4, Korea_Longline = 5, Russia_Trawl = 6, Russia_Longline = 7, Total = 8) %>% 
-  pivot_longer(Japan_Trawl:Russia_Longline, names_to = c("Country", "Gear"), names_sep = "_", values_to = "Catch") %>% 
+# get the historical catch record after 2002 from the NPFC website "https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx"
+catch_after_2002 <- data.frame(read_excel("data/NPFC_catch_summary.xlsx", 
+                                          sheet = "Catch Summary", 
+                                          col_types = "numeric", skip = 134)) %>%
+  rename(Year = 1, Japan_Trawl = 2, Japan_Gillnet = 3, 
+         Korea_Trawl = 4, Korea_Longline = 5, Russia_Trawl = 6, 
+         Russia_Longline = 7, Total = 8) %>% 
+  pivot_longer(Japan_Trawl:Russia_Longline, 
+               names_to = c("Country", "Gear"), 
+               names_sep = "_", 
+               values_to = "Catch") %>% 
+  filter(Year > 0) %>% # omit "NA"
   mutate(Species = "SA") %>% 
   select(Year, Country, Gear, Species, Catch)
 
-# get the historical catch record before 2001 from the FAO statistics
-download.file("https://www.npfc.int/system/files/2021-04/NPFC-2021-AR-Annual%20Summary%20Footprint%20-%20Bottom%20Fisheries.xlsx", destfile = "data/NPFC_catch_summary.xlsx", mode = "wb", quiet = FALSE)
-## unzip the file
 ## get the species data for SA including their synonyms
 species_code_SA <- read.csv("data/FAO/CL_FI_SPECIES_GROUPS.csv", header = T) %>% 
   filter(Name_En %in% c("Splendid alfonsino",
@@ -160,22 +162,36 @@ FAO_catch_Russia_and_Korea <- FAO_catch_NPFC_area %>%
   rename(Korea = KR) %>% 
   pivot_longer(Korea:Russia,names_to = "COUNTRY", values_to = "VALUE")
 
-FAO_catch <- bind_rows(FAO_catch_Japan, FAO_catch_Russia_and_Korea)
+catch_before_2001_Russia_Korea <- FAO_catch_Russia_and_Korea %>% 
+  filter(PERIOD <= 2001) %>% 
+  select(PERIOD, COUNTRY, MEASURE, SPECIES.ALPHA_3_CODE, VALUE) %>% 
+  rename(Year = 1, Country = 2, Gear = 3, Species = 4, Catch = 5) %>% 
+  mutate(Gear = "Trawl", Species = "SA")
 
-# get the historical catch record before 2001 for Japan from "Historical_catch_NPA_SA_JP.csv" because the catch values of the FAO statistics are incorrect
-NPFC_catch_before_2002 <- read.csv("data/Historical_catch_NPA_SA_JP.csv", header = T) %>%
+## get the historical catch record before 2001 for Japan from "Historical_catch_NPA_SA_JP.csv" due to incorrect values of the FAO statistics
+catch_before_2001_Japan <- read.csv("data/Historical_catch_NPA_SA_JP.csv", header = T) %>%
   filter(Species == "SA")
 
-NPFC_catch <- full_join(NPFC_catch_after_2002, NPFC_catch_before_2002) %>% 
-  arrange(Year)
-NPFC_catch$Country <- factor(NPFC_catch$Country, levels = c("Japan", "Korea", "Russia"))
+## merge the Japan data with Russia and Korea data
+catch_before_2001 <- full_join(catch_before_2001_Russia_Korea, catch_before_2001_Japan)
+
+## merge all the data into a single dataframe
+NPFC_catch <- full_join(catch_after_2002, catch_before_2001) %>% 
+  arrange(Year) %>% 
+  mutate(Country = str_replace(Country, "Russia", "USSR/Russia"))
+NPFC_catch$Country <- factor(NPFC_catch$Country, levels = c("Japan", "Korea", "USSR/Russia"))
+
+# plotting
+max_annual_catch <- max(NPFC_catch %>% group_by(Year) %>% summarise(sum = sum(Catch)))
 
 p1 <- ggplot(NPFC_catch) +
   geom_bar(aes(x = Year, y = Catch, fill = Country), stat = "identity", position = "stack") +
   ylab("Catch (tons)") +
   xlab("") +
-  scale_x_continuous(breaks = seq(min(NPFC_catch$Year, na.rm = TRUE), max(NPFC_catch$Year, na.rm = TRUE), 10)) +
-  scale_y_continuous(expand = c(0, 0),
+  scale_x_continuous(breaks = seq(first(NPFC_catch[NPFC_catch$Catch>0,]$Year), max(NPFC_catch$Year, na.rm = T), 10),
+                     limits = c(first(NPFC_catch[NPFC_catch$Catch>0,]$Year-1), max(NPFC_catch$Year, na.rm = T)+1)) +
+  scale_y_continuous(breaks = seq(0, max_annual_catch, 1000),
+                     expand = c(0, 0),
                      labels = label_comma()) +
   scale_fill_brewer(palette = "Set1") +
   theme_bw() +
@@ -296,23 +312,27 @@ Currently, there is no accepted harvest control rule for this species.
 
 In 2016, the management measures were implemented, which includes limiting the fishing effort to the 2007’s level, prohibiting fisheries from November to December (which corresponds to the spawning season for North Pacific armorhead) and not allowing fisheries in C-H Seamount and the southeastern part of Koko Seamount (for the protection of VMEs)
 
-In 2019, an additional measure was adopted, which includes the regulation of the mesh size (trawl: \> 10 cm) to protect juvenile fish. Still, this measure may be insufficient as the substantial catch of young fish has been reported by trawlers even after being implemented.
+In 2019, an additional measure was adopted, which includes the regulation of the mesh size (trawl: \> 13 cm) to protect juvenile fish. Effectiveness of this measure yet to be clearly demonstrated (Sawada and Ichii 2020).
 
 ## Data Summary
 
 ```{r data table}
 options(knitr.kable.NA = "")
 
-DataTable <- data.frame(read_xlsx("SA_Species_Summary_Data.xlsx"))
-
-switch(out_type,
-  html = DataTable %>%
-    kbl(col.names = c("Data type", "Source", "Years available", "Comment")) %>%
+CatchDataTable <- data.frame(read.csv("data/SA_Species_Summary_CatchDataTable.csv", header = T))%>%
+    kbl(col.names = c("Data type", "Country", "Gear", "Years available", "Comments")) %>%
     kable_paper(full_width = F) %>%
     row_spec(0, bold = T, color = "white") %>%
     column_spec(3, width = "15em") %>%
     kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
-)
+
+BioDataTable <- data.frame(read.csv("data/SA_Species_Summary_BioDataTable.csv", header = T)) %>% 
+  kbl(col.names = c("Data type", "Country", "Years available", "Comments")) %>%
+    kable_paper(full_width = F) %>%
+    row_spec(0, bold = T, color = "white") %>%
+    column_spec(3, width = "15em") %>%
+    kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
+
 ```
 
 
@@ -324,5 +344,7 @@ Kaschner, K., Kesner-Reyes, K., Garilao, C., Segschneider, J., Rius-Barile, J. R
 Shotton, R. (2016). Global review of alfonsino (Beryx spp.), their fisheries, biology and management. FAO Fisheries and Aquaculture Circular, (C1084), I.
 
 Sawada, K., Nishida, K., Yonezaki, S. and Kiyota, M. (2018). Review of biology and fisheries of Splendid alfonsino Beryx splendens, especially in the Emperor seamounts area. NPFC-2018-SSC- BF01-WP03. 26 pp.
+
+Sawada, K., and Ichii, T. (2020) Catch size composition of splendid alfonsino in the Emperor Seamounts area before and after the implementation of the mesh size regulation. NPFC-2020-SSC BFME01-WP05 (Rev. 1). 3 pp.
 
 Nishimura, A., & Yatsu, A. (2008, October). Application of surplus-production models to splendid alfonsin stock in the Southern Emperor and Northern Hawaiian Ridge (SE-NHR). In Fifth Intergovernmental Meeting on Establishment of New Mechanism for Management of High Seas Bottom Trawl Fisheries in the North Western Pacific Ocean (NWPBT/SWG-05), Tokyo, 17-18 October 2008 (pp. 1-11).
