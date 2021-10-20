@@ -33,6 +33,7 @@ library(GLDEX)
 library(RColorBrewer)
 library(scales)
 library(proj4)
+library(flextable)
 ```
 
 # Splendid alfonsino (*Beryx splendens*)
@@ -289,23 +290,18 @@ Available from <https://www.npfc.int/active-conservation-and-management-measures
 
 
 ```{r management table,message=FALSE,warning=FALSE, results='asis'}
-MngmtTable <- data.frame(
-  row.names = c("Biological reference points", "Stock status", "Catch limit", "Harvest control rule", "Other"),
-  Status = c("Not accomplished", "Unknown", "Intermediate", "Not accomplished", "Intermediate"),
-  Comment = c("Not established", "Status determination criteria not established", "Recommended catch, effort limits", "Not established", "No expansion of fishing beyond established areas")
-)
+mngmt_table <- read.csv("data/SA_ManagementTable.csv", header = T) 
 
 cols <- brewer.pal(9, "Set1")
 
-switch(out_type,
-  html = MngmtTable %>%
-    kable() %>%
-    kable_paper(full_width = F) %>%
-    row_spec(0, bold = T, color = "white") %>%
-    column_spec(1, bold = T) %>%
-    column_spec(2, background = c(cols[1], cols[9], cols[5], cols[1], cols[5]), color = "white") %>%
-    kable_styling(font_size = 18, bootstrap_options = c("basic", "striped"))
-)
+flextable(mngmt_table) %>% 
+  set_header_labels(Control.type = "Control type") %>% 
+  theme_booktabs() %>%
+  bold(part = "header") %>% 
+  set_caption(caption = "Summary of management measures") %>%
+  autofit() %>% 
+  bg(bg = "wheat", part = "header") %>% 
+  bg(j = 2, bg = cols, part = "body")
 ```
 
 Currently, there is no accepted harvest control rule for this species.
@@ -317,22 +313,28 @@ In 2019, an additional measure was adopted, which includes the regulation of the
 ## Data Summary
 
 ```{r data table}
-options(knitr.kable.NA = "")
+data_table <- read.csv("data/SA_DataTable.csv", header = T)
 
-CatchDataTable <- data.frame(read.csv("data/SA_Species_Summary_CatchDataTable.csv", header = T))%>%
-    kbl(col.names = c("Data type", "Country", "Gear", "Years available", "Comments")) %>%
-    kable_paper(full_width = F) %>%
-    row_spec(0, bold = T, color = "white") %>%
-    column_spec(3, width = "15em") %>%
-    kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
+data_table_catch <- data_table %>% 
+  filter(Type =="catch") %>% 
+  select(-"Type")
 
-BioDataTable <- data.frame(read.csv("data/SA_Species_Summary_BioDataTable.csv", header = T)) %>% 
-  kbl(col.names = c("Data type", "Country", "Years available", "Comments")) %>%
-    kable_paper(full_width = F) %>%
-    row_spec(0, bold = T, color = "white") %>%
-    column_spec(3, width = "15em") %>%
-    kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
+data_table_bio <- data_table %>% 
+  filter(Type =="biological") %>% 
+  select(-"Type", -"Fishery")
 
+# create a function to output the table by "flextable"
+output_as_flextable <- function(data, title){
+  flextable(data) %>%
+    theme_booktabs() %>%
+    bold(part = "header") %>%
+    set_caption(caption = title) %>%
+    autofit()
+}
+
+output_as_flextable(data_table_catch, "Catch data")
+
+output_as_flextable(data_table_bio, "Biological data")
 ```
 
 

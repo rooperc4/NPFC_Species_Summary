@@ -33,6 +33,7 @@ library(GLDEX)
 library(RColorBrewer)
 library(scales)
 library(proj4)
+library(flextable)
 ```
 
 # North Pacific armorhead (*Pentaceros wheeleri*)
@@ -224,21 +225,16 @@ The following NPFC conservation and management measures pertain to this species:
 Available from <https://www.npfc.int/active-conservation-and-management-measures>
 
 ```{r manaagment table,message=FALSE,warning=FALSE, results='asis'}
-MngmtTable<-data.frame(
-row.names = c("Biological reference points", "Stock status","Catch limit","Harvest control rule", "Other"), 
-Status = c("Not accomplished", "Unknown", "Intermediate", "Not accomplished", "Intermediate"),
-Comment = c("Not established","Status determination criteria not established","Recommended catch, effort limits","Not established","No expansion of fishing beyond established areas"))
+mngmt_table <- read.csv("data/NPA_ManagementTable.csv", header = T) 
 
 cols <- brewer.pal(9, "Set1")
 
-MngmtTable %>% 
-  kable()%>%
-  kable_paper(full_width=F)%>%
-  row_spec(0, bold = T, color = "white")%>% 
-  column_spec(1, bold = T) %>% 
-  column_spec(2, background = c(cols[1], cols[9], cols[5], cols[1], cols[5]), color ="white") %>% 
-  kable_styling(font_size = 18, bootstrap_options = c("basic", "striped"))
-
+flextable(mngmt_table, ) %>% 
+  set_header_labels(Control.type = "Control type") %>% 
+  theme_booktabs() %>%
+  bold(part = "header") %>% 
+  set_caption(caption = "Summary of management measures") %>%
+  autofit()
 ```
 
 In 2019, an adaptive management plan was implemented for North Pacific armorhead (NPFC-2019-SSC BF02-WP05, CMM 2019-05). This plan specifies data collection via an annual monitoring survey to be conducted in March-June each year on Koko, Yuryaki, Kammu and/or Colahan Seamounts. If the survey finds evidence of strong recruitment (see CMM 2021-05 and NPFC-2019-SSC BF02-IP01 for details) some areas in the Emperor Seamounts are closed and a 12,000 ton catch limit is encouraged. In low recruitment years, a 700 ton catch limit is encouraged.
@@ -246,16 +242,28 @@ In 2019, an adaptive management plan was implemented for North Pacific armorhead
 ## Data Summary
 
 ```{r data table}
-options(knitr.kable.NA = '')
+data_table <- read.csv("data/NPA_DataTable.csv", header = T)
 
-DataTable <-data.frame(read_xlsx("data/NPA_Species_Summary_DataTable.xlsx"))
+data_table_catch <- data_table %>% 
+  filter(Type =="catch") %>% 
+  select(-"Type")
 
-DataTable %>% 
-  kbl(col.names = c("Data type", "Source", "Years available", "Comment"))%>%
-  kable_paper(full_width=F) %>% 
-  row_spec(0, bold = T, color = "white") %>% 
-  column_spec(1, bold = T) %>% 
-  kable_styling(font_size = 15, bootstrap_options = c("basic", "striped"))
+data_table_bio <- data_table %>% 
+  filter(Type =="biological") %>% 
+  select(-"Type", -"Fishery")
+
+# create a function to output the table by "flextable"
+output_as_flextable <- function(data, title){
+  flextable(data) %>%
+    theme_booktabs() %>%
+    bold(part = "header") %>%
+    set_caption(caption = title) %>%
+    autofit()
+}
+
+output_as_flextable(data_table_catch, "Catch data")
+
+output_as_flextable(data_table_bio, "Biological data")
 ```
 
 ## References
