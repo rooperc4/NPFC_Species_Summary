@@ -318,7 +318,7 @@ In 2016, the management measures were implemented, which includes limiting the f
 
 In 2019, an additional measure was adopted, which includes the regulation of the mesh size (trawl: \> 13 cm) to protect juvenile fish. Effectiveness of this measure yet to be clearly demonstrated (Sawada and Ichii 2020).
 
-## Data Summary
+## Data Availability
 
 ```{r data table}
 data_table <- read.csv("data/SA_DataTable.csv", header = T)

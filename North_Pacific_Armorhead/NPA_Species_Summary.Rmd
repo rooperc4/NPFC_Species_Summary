@@ -249,7 +249,7 @@ kbl(mngmt_table, caption = "<strong>Current status of management measures</stron
 
 In 2019, an adaptive management plan was implemented for North Pacific armorhead (NPFC-2019-SSC BF02-WP05, CMM 2019-05). This plan specifies data collection via an annual monitoring survey to be conducted in March-June each year on Koko, Yuryaki, Kammu and/or Colahan Seamounts. If the survey finds evidence of strong recruitment (see CMM 2021-05 and NPFC-2019-SSC BF02-IP01 for details) some areas in the Emperor Seamounts are closed and a 12,000 ton catch limit is encouraged. In low recruitment years, a 700 ton catch limit is encouraged.
 
-## Data Summary
+## Data Availability
 
 ```{r data table}
 data_table <- read.csv("data/NPA_DataTable.csv", header = T)
