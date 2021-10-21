@@ -1,0 +1,18 @@
+Data,Type,Country,Fishery,Year,Comments
+Annual catch,catch,Japan,Trawl,1969-present,
+,catch,,Gillnet,1990-present,
+,catch,Korea,Trawl,2004-2019,
+,catch,Russia,Trawl,1970-1987; 1997; 2001-2002; 2005-2006; 2011; 2013,
+CPUE,catch,Japan,Trawl,1970-present,Logbook data availabe
+,catch,,Gillnet,2008-present,Logbook data available
+,catch,Korea,Trawl,2013-2019,Logbook data available
+,catch,Russia,Trawl,2001-2002; 2005-2006; 2011; 2013,
+Age,biological,Japan,,NA,A preliminary daily ring analysis for ca. 300 fish
+,biological,Korea,,2013-2019,
+,biological,Russia,,NA,
+Length,biological,Japan,,2009-present,Protocol revised (see NPFC-2018-SSC BF01-WP03)
+,biological,Korea,,2013-2019,
+,biological,Russia,,NA,
+Maturity,biological,Japan,,2013-present,
+,biological,Korea,,2013-2019,
+,biological,Russia,,1970-1987; 1997; 2011; 2013,
