@@ -14,7 +14,7 @@ always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_knit$set(root.dir = "C:/Users/10040153/Documents/R_WorkingDirectory/NPFC_Species_Summary")
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 out_type <- knitr::opts_knit$get("rmarkdown.pandoc.to")
 options(tinytex.verbose = TRUE)
@@ -293,15 +293,23 @@ Available from <https://www.npfc.int/active-conservation-and-management-measures
 mngmt_table <- read.csv("data/SA_ManagementTable.csv", header = T) 
 
 cols <- brewer.pal(9, "Set1")
+switch_status_bg <- function(x){
+  switch(x,
+         "Not accomplished" = cols[1],
+         "Intermediate" = cols[5],
+         "OK" = cols[3], 
+         "Unknown" = cols[9]
+  )
+}
+bg_cols <- c()
+for (i in mngmt_table$Status){
+  bg_cols <- append(bg_cols, switch_status_bg(i))
+}
 
-flextable(mngmt_table) %>% 
-  set_header_labels(Control.type = "Control type") %>% 
-  theme_booktabs() %>%
-  bold(part = "header") %>% 
-  set_caption(caption = "Summary of management measures") %>%
-  autofit() %>% 
-  bg(bg = "wheat", part = "header") %>% 
-  bg(j = 2, bg = cols, part = "body")
+kbl(mngmt_table, caption = "<strong>Current status of management measures</strong>") %>%
+  column_spec(1, bold = T) %>%
+  column_spec(2, color = "white", background = bg_cols) %>% 
+  column_spec(3, width = "10cm")
 ```
 
 Currently, there is no accepted harvest control rule for this species.
@@ -318,23 +326,16 @@ data_table <- read.csv("data/SA_DataTable.csv", header = T)
 data_table_catch <- data_table %>% 
   filter(Type =="catch") %>% 
   select(-"Type")
+kbl(data_table_catch, caption = "Catch data") %>%
+  column_spec(4, width = "5cm")
+
 
 data_table_bio <- data_table %>% 
   filter(Type =="biological") %>% 
   select(-"Type", -"Fishery")
+kbl(data_table_bio, caption = "Biological data") %>%
+  column_spec(3, width = "5cm")
 
-# create a function to output the table by "flextable"
-output_as_flextable <- function(data, title){
-  flextable(data) %>%
-    theme_booktabs() %>%
-    bold(part = "header") %>%
-    set_caption(caption = title) %>%
-    autofit()
-}
-
-output_as_flextable(data_table_catch, "Catch data")
-
-output_as_flextable(data_table_bio, "Biological data")
 ```
 
 
