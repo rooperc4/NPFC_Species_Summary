@@ -1,9 +1,9 @@
 Data,Source,Years,Comment
 Catch,China,2016-present,Catches from convention area
-,Chinese Taipei,,Minor bycatch in Pacific saury fishery
 ,Japan,1995-present,"Historical catch data from 1968 available, catches in national waters"
 ,Korea,,Minor bycatch in bottom trawl fishery
 ,Russia,2016-present,"Catches primarily in national waters, not convention area"
+,Chinese Taipei,,Minor bycatch in Pacific saury fishery
 CPUE,,,not developed
 Survey,Japan,,Pre-recruit survey
 ,Japan,,Juvenile survey
@@ -12,7 +12,7 @@ Survey,Japan,,Pre-recruit survey
 Age data,China,2020,Commercial catch
 ,Japan,,Commercial and survey catches
 ,Russia,,Commercial and survey catches
-Length data,China,2020,Commerical catch
+Length data,China,2020,Commercial catch
 ,Japan,,Commercial and survey catches
 ,Russia,,Commercial and survey catches
 Maturity/fecundity,China,2020,Commercial catch
