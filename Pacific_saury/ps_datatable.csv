@@ -1,0 +1,13 @@
+Data,Source,Years,Comment
+Catch,China,2013-present,Catches from convention area
+,Japan,1950-present,Japan’s time series of catch data are broken into Early (1980-1993) and Late (1994-2021) CPUE because of time-varying q in the early part of the time series
+,Korea,2001-present,
+,Russia,1994-present,
+,Chinese Taipei,2001-present,
+,Vanuatu,2011-present,
+CPUE,,,"CPUE calculated individually by China, Japan, Korea, Russian, Chinese Taipei, and Vanuatu and as a joint CPUE"
+Survey,Japan,,Fishery-independent biomass survey
+Length data,Japan,,Fishery-independent biomass survey
+,Japan,,Commercial catch
+Maturity/fecundity,,,
+Age,Japan,,Fishery-independent biomass survey

@@ -1,0 +1,16 @@
+Data,Source,Years,Comment
+Catch,Canada,1965-present,Catches from national waters and convention area
+,USA,~1960-present,Catches in national waters
+CPUE,Canada,~1988-present,
+,USA,~1988-present,
+Survey,Canada,1990-2009,Longline trap standard survey
+,Canada,2003-present,Longline trap random survey
+,USA,1978-present,Alaska longline survey
+,USA,1982-present,Alaska bottom trawl surveys
+,USA,2003-present,West Coast bottom trawl survey
+Age data,Canada,variable,"Commercial and survey catches, including NPFC Convention Area"
+,USA,variable,Commercial and survey catches
+Length data,Canada,variable,"Commercial and survey catches, including NPFC Convention Area"
+,USA,variable,Commercial and survey catches
+Maturity/fecundity,Canada,variable,Commercial and survey catches in national waters
+,USA,variable,Research cruises in national waters
