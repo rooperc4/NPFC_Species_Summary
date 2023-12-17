@@ -135,35 +135,32 @@ mngmt_table %>%
 ## Assessment
 
 
-A stock assessment for Pacific Saury is conducted annually by The NPFC’s Small Scientific Committee on Pacific Saury (SSC PS) available at: https://www.npfc.int/system/files/2023-02/SSC%20PS10%20report_0.pdf. The assessment is a Bayesian state-space production model (BSSPM) and has been in use since 2019(?). The assessment is a collaborative effort among Members of the Small Scientific Committee on Pacific Saury.
+A stock assessment for Pacific Saury is conducted annually by the NPFC’s Small Scientific Committee on Pacific Saury (SSC PS) available at: https://www.npfc.int/system/files/2023-02/SSC%20PS10%20report_0.pdf. The assessment has been a collaborative effort among Members of SSC PS based on a Bayesian state-space production model (BSSPM) since 2019 (Figure 2).
 
+\newline
+\newline
 
-The total catch of Pacific saury has been in decline since approximately 2010 (Figure 2). Similarly the biomass estimated by the BSSPM stock assessment has also generally declined from its peak during the past two decades. 
-
-
-```{r picture5, fig.cap="", echo=FALSE,eval=FALSE}
+```{r picture5, out.width=300, fig.cap="Figure 2. Time series of biomass (left panel) and Kobe plot (right panel) Pacific Saury stock assessment.", echo=FALSE}
 
 knitr::include_graphics(c("Figures/Figure5.png","Figures/Figure6.png"))
 
 ```
+*Figure 2. Time series of biomass (left panel) and Kobe plot (right panel) Pacific Saury stock assessment.*
+\newline
+\newline
 
-\newline \newline
 
-```{r picture6, fig.cap="Figure 2. Time series of catch by age in the Pacific Saury fishery (Japan domestic data only) and time series of spawning stock biomass, total biomass and recruitment from the domestic Japanese Sardine stock assessment (top panels). Kobe plot indicating historical and current status of Japanese sardine in relation to MSY-based reference points (reprinted from Japan's domestic stock assessment of Japanese Sardine (bottom panel).", echo=FALSE,eval=FALSE}
-
-knitr::include_graphics("Figures/Figure7.png")
-
-```
+The total catch of Pacific saury has been in decline since approximately 2010 (Figure 3). Similarly the biomass estimated by the BSSPM stock assessment has also generally declined from its peak during the past two decades. 
 
 ## Data
 ### Surveys
-Japan conducts three surveys that estimate recruitment for a number of pelagic species, including Pacific Saury (Table 2). The surveys target pre-recruits and juveniles to determine an index of recruitment. Surveys are conducted in spring (1995-2020), summer (2001-2020) and fall (2005-2020) at 30-80 stations per year. The survey protocol can be found at [@Oozeki2007]. Russia has conducted a summertime acoustic-trawl survey since 2010 that examines mid-water and upper epipelagic species including Pacific Saury. The spring biomass survey conducted by Japan is the primary fisheries independent index of abundance for the species used in the stock assessment (**reference for survey?**)
+Since 2003, Japan has been conducting a biomass survey covering a wide area of the NPFC Convention area with several research vessels before its main fishing season. The main purpose of the surveys is to understand the distribution and abundance of Pacific saury and to develop abundance indices for use in stock assessments. Fish sampling also contributes to the understanding of length composition and its inter-annual change.
 
 ### Fishery
 
 The fishing grounds are west of 180o E but differ among Members who fish for Pacific saury: China, Japan, Korea, Russia, Chinese Taipei, and Vanuatu. The stick-held dip net gear has become the dominant fishing technique to catch Pacific saury in the northwest Pacific Ocean. Near the coast Japan also catches Pacific Saury with setnet gear. The fishing is mainly carried out from June-November with peaks typically in the late summer or fall. Other NPFC Members (Canada and USA) do not target Pacific saury.
 
-Standardized catch per unit effort (CPUE) is calculated by all Members participating in the Pacific saury fishery and a joint standardized CPUE is calculated across all Member each year and utilized in the assessment (Hsu et al. ????).
+Standardized catch per unit effort (CPUE) is calculated by all Members participating in the Pacific saury fishery and a joint standardized CPUE is calculated across all Member each year and utilized in the assessment (Hsu et al. 2023).
 
 Updated data on Pacific saury catches in the northwestern Pacific Ocean from 1995 are available on the NPFC website: https://www.npfc.int/pacific-saury-catches. Prior years fishery catch data was downloaded from FAO data collections at https://www.openfisheries.org using rfisheries package [@Karthik2013].
 
@@ -213,7 +210,7 @@ p1
 dev.off()
 ```
 
-```{r picture2, fig.cap="Figure 2. Historical catch of Pacific Saury.", echo=FALSE}
+```{r picture2, fig.cap="Figure 3. Historical catch of Pacific Saury.", echo=FALSE}
 
 knitr::include_graphics("Figures/Figure3.png")
 
@@ -232,7 +229,7 @@ Russia=as.numeric(NPFC_effort[,9])+as.numeric(NPFC_effort[,10])+as.numeric(NPFC_
 CT=as.numeric(NPFC_effort[,12])+as.numeric(NPFC_effort[,13]),
                       Vanuatu=as.numeric(NPFC_effort[,14]))
 
-NPFC_effort<-pivot_longer(NPFC_effort,China:Russia,names_to="Member",values_to="Effort")
+NPFC_effort<-pivot_longer(NPFC_effort,China:Vanuatu,names_to="Member",values_to="Effort")
 
 p1<-ggplot(NPFC_effort)+geom_bar(aes(x=Year,y=Effort,fill=Member),stat="identity",position="stack")+
   ggtitle("Pacific Saury")+ylab("Effort (Days fished)")+xlab("") + scale_x_continuous(breaks = seq(1995,max(NPFC_effort$Year),5))+
@@ -255,7 +252,7 @@ dev.off()
 
 
 
-```{r picture1, fig.cap="Figure 3. Historical fishing effort for Pacific saury.", echo=FALSE}
+```{r picture1, fig.cap="Figure 4. Historical fishing effort for Pacific saury.", echo=FALSE}
 
 knitr::include_graphics("Figures/Figure4.png")
 
@@ -306,7 +303,7 @@ The Pacific saury larvae prey on the nauplii of copepods and other small-sized z
 
 
 
-```{r picture4, fig.cap="Figure 4. Map of distribution of Pacific saury in the North Pacific.", echo=FALSE}
+```{r picture4, fig.cap="Figure 6. Map of distribution of Pacific saury in the North Pacific.", echo=FALSE}
 
 knitr::include_graphics("Figures/distributionmap.jpg")
 
